@@ -19,17 +19,8 @@ db.serialize(() => {
 const client = new Client({
     authStrategy: new LocalAuth(), // Mantém a sessão ativa
     puppeteer: {
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
-        args: [
-            '--no-sandbox', 
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process', 
-            '--disable-gpu'
-        ]
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
     }
 });
 
@@ -38,7 +29,7 @@ let lastListMessages = {}; // Dicionário para rastrear a última mensagem da li
 // Gera QR Code no terminal
 client.on('qr', (qr) => {
     console.log('--- NOVO LOGIN NECESSÁRIO ---');
-    qrcode.generate(qr, { small: true });
+    qrcode.generate(qr, { small: false }); // larger QR for easier scan
     console.log('Escaneie o QR Code acima com o seu WhatsApp!');
 });
 
