@@ -1,0 +1,5 @@
+node_modules/
+.wwebjs_auth/
+.wwebjs_cache/
+lista_compras_v2.db
+.env

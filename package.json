@@ -1,0 +1,14 @@
+{
+  "name": "bot_mercado",
+  "version": "1.0.0",
+  "description": "Bot WhatsApp para lista de compras",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "qrcode-terminal": "^0.12.0",
+    "sqlite3": "^5.1.7",
+    "whatsapp-web.js": "^1.26.0"
+  }
+}
