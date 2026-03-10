@@ -21,6 +21,11 @@ db.serialize(() => {
     )`);
 });
 
+// Inicializa o Servidor Web imediatamente para o Render não matar o processo (Health Check)
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Servidor HTTP rodando na porta ${port}`);
+});
+
 // Inicializa cliente do WhatsApp Web
 const client = new Client({
     authStrategy: new LocalAuth(), // Mantém a sessão ativa
@@ -39,8 +44,11 @@ const client = new Client({
             '--disable-gpu',
             '--no-zygote',
             '--single-process',
-            '--hide-scrollbars'
-        ]
+            '--hide-scrollbars',
+            '--disable-setuid-sandbox',
+            '--js-flags="--max-old-space-size=400"' // Limita o uso de memória do Chrome
+        ],
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
     }
 });
 
@@ -212,8 +220,4 @@ app.get('/', (req, res) => {
             </html>
         `);
     }
-});
-
-app.listen(port, '0.0.0.0', () => {
-    console.log(`Servidor HTTP rodando na porta ${port}`);
 });
