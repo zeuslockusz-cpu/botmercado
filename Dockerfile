@@ -25,5 +25,8 @@ RUN npm install
 # Copia o código
 COPY . .
 
+# Expõe a porta para o Render (Web Service)
+EXPOSE 3000
+
 # Comando de início do bot
 CMD ["npm", "start"]

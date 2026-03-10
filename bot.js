@@ -1,6 +1,12 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const sqlite3 = require('sqlite3').verbose();
+const express = require('express');
+const QRCodeGenerator = require('qrcode');
+const app = express();
+const port = process.env.PORT || 3000;
+
+let currentQR = ''; // Variável para armazenar o QR Code para o site
 
 // Inicializa o banco de dados
 const dbFile = 'lista_compras_v2.db'; // Usar novo banco de dados
@@ -27,10 +33,19 @@ const client = new Client({
 
 let lastListMessages = {}; // Dicionário para rastrear a última mensagem da lista enviada por chat
 
-// Gera QR Code no terminal
-client.on('qr', (qr) => {
+// Gera QR Code no terminal e no site
+client.on('qr', async (qr) => {
     console.log('--- NOVO LOGIN NECESSÁRIO ---');
-    qrcode.generate(qr, { small: false }); // larger QR for easier scan
+    qrcode.generate(qr, { small: true });
+    
+    // Gera imagem para o site
+    try {
+        currentQR = await QRCodeGenerator.toDataURL(qr);
+        console.log(`Acesse o site para escanear: https://botmercado.onrender.com (ou a URL do seu Render)`);
+    } catch (err) {
+        console.error('Erro ao gerar QR Code para o site:', err);
+    }
+    
     console.log('Escaneie o QR Code acima com o seu WhatsApp!');
 });
 
@@ -146,3 +161,46 @@ client.on('message_create', async (message) => {
 
 // Inicia o cliente
 client.initialize();
+
+// Servidor Web para facilitar o escaneamento no Render
+app.get('/', (req, res) => {
+    if (currentQR) {
+        res.send(`
+            <html>
+                <head>
+                    <title>Conectar WhatsApp Bot</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <style>
+                        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
+                        .container { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; max-width: 90%; }
+                        img { width: 300px; height: 300px; border: 15px solid white; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 20px 0; }
+                        h1 { color: #128c7e; font-size: 1.5rem; }
+                        p { color: #555; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>Conectar seu WhatsApp</h1>
+                        <p>Escaneie o QR Code abaixo usando o menu "Aparelhos Conectados" no seu celular:</p>
+                        <img src="${currentQR}">
+                        <p><i>Se o QR expirar, atualize esta página.</i></p>
+                    </div>
+                </body>
+            </html>
+        `);
+    } else {
+        res.send(`
+            <html>
+                <body style="font-family:sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;">
+                    <h1 style="color:#128c7e;">Bot Operacional</h1>
+                    <p>O bot já está conectado ou o QR Code ainda não foi gerado.</p>
+                    <p>Se você acabou de iniciar, aguarde alguns segundos e atualize a página.</p>
+                </body>
+            </html>
+        `);
+    }
+});
+
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Servidor HTTP rodando na porta ${port}`);
+});
