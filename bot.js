@@ -24,9 +24,10 @@ db.serialize(() => {
 // Inicializa cliente do WhatsApp Web
 const client = new Client({
     authStrategy: new LocalAuth(), // Mantém a sessão ativa
+    authTimeoutMs: 120000,         // Espera até 2 minutos para carregar o WhatsApp
     webVersionCache: {
         type: 'remote',
-        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html'
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1014581023-alpha.html'
     },
     puppeteer: {
         headless: true,
@@ -36,9 +37,9 @@ const client = new Client({
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
             '--disable-gpu',
-            '--disable-extensions',
             '--no-zygote',
-            '--single-process'
+            '--single-process',
+            '--hide-scrollbars'
         ]
     }
 });
